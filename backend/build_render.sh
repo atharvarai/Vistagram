@@ -14,12 +14,13 @@ export CARGO_HOME=/tmp/cargo
 export RUSTUP_HOME=/tmp/rustup
 export PIP_NO_CACHE_DIR=1
 
-# Install dependencies with pre-compiled wheels
+# Install dependencies with pre-compiled wheels only
 echo "📦 Installing Python dependencies..."
-pip install --no-cache-dir --prefer-binary -r requirements_simple.txt
+pip install --only-binary=all -r requirements_simple.txt
 
-# Skip verification to avoid import issues during build
-echo "🔍 Skipping package verification during build..."
+# Verify key packages are installed
+echo "🔍 Verifying installations..."
+python -c "import fastapi, uvicorn, sqlalchemy, redis, pydantic; print('✅ All key packages installed')"
 
 # Create uploads directory
 echo "📁 Creating uploads directory..."
