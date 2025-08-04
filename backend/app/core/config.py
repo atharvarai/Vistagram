@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     ALLOWED_ORIGINS: list = ["*"]  # Allow all origins for production deployment
     
     # Frontend URL for share links
-    FRONTEND_URL: str = "http://localhost:3000"
+    FRONTEND_URL: str = "https://vistagram-peach.vercel.app"
     
     # Redis settings
     REDIS_URL: str = "redis://localhost:6379"
