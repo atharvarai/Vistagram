@@ -3,7 +3,7 @@ services:
     name: vistagram-backend
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt && chmod +x build.sh && ./build.sh
+    buildCommand: pip install -r requirements.txt && python seed_data.py
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: SECRET_KEY
@@ -15,7 +15,7 @@ services:
       - key: UPLOAD_DIR
         value: uploads
       - key: REDIS_URL
-        value: redis://localhost:6379
+        value: rediss://red-d28bpi15pdvs738dslmg:Y4rUiJCxdiqNlCWV8Qmzx0faPZDnLxxN@oregon-keyvalue.render.com:6379
       - key: REDIS_DB
         value: 0
       - key: REDIS_PASSWORD
