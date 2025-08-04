@@ -3,7 +3,7 @@ services:
     name: vistagram-backend
     env: python
     plan: free
-    buildCommand: chmod +x build.sh && ./build.sh
+    buildCommand: pip install -r requirements.txt && chmod +x build.sh && ./build.sh
     startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: SECRET_KEY
