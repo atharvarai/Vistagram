@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from './Navbar';
+import FormInput from './ui/FormInput';
+import Button from './ui/Button';
+import Card from './ui/Card';
+import Alert from './ui/Alert';
 
 interface LoginProps {
   onSwitchToRegister: () => void;
@@ -28,100 +32,86 @@ const Login: React.FC<LoginProps> = ({ onSwitchToRegister }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen">
       <Navbar showUserInfo={false} />
-      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] py-12 px-6">
+      
+      <div className="flex items-center justify-center min-h-[calc(100vh-64px)] py-8 px-4">
         <div className="w-full max-w-md">
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-slate-200/50 p-10">
-            <div className="text-center mb-10">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+          <Card glass={true} shadow="xl" padding="lg" className="transform hover:scale-[1.02] transition-transform duration-300">
+            
+            {/* Header Section */}
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <img 
                   src="/logo.png" 
                   alt="Vistagram" 
-                  style={{ width: '30%', height: '30%' }}
                   className="object-contain"
+                  style={{ width: '100%', height: '100%' }}
                 />
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">
+              <h1 className="text-xl font-bold text-gray-900 mb-1">
                 Welcome back
-              </h2>
-              <p className="text-slate-600 text-lg">
+              </h1>
+              <p className="text-gray-600 text-sm">
                 Sign in to your Vistagram account
               </p>
             </div>
             
-            <form className="space-y-8" onSubmit={handleSubmit}>
-              <div className="space-y-6">
-                <div>
-                  <label htmlFor="username" className="block text-base font-semibold text-slate-700 mb-3">
-                    Username
-                  </label>
-                  <input
+            {/* Form Section */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <FormInput
                     id="username"
-                    name="username"
+                label="Username"
                     type="text"
-                    required
-                    className="w-full px-6 py-4 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-slate-900 placeholder-slate-400 text-lg"
-                    placeholder="Enter your username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="password" className="block text-base font-semibold text-slate-700 mb-3">
-                    Password
-                  </label>
-                  <input
+                placeholder="Enter your username"
+                required
+              />
+
+              <FormInput
                     id="password"
-                    name="password"
+                label="Password"
                     type="password"
-                    required
-                    className="w-full px-6 py-4 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-slate-900 placeholder-slate-400 text-lg"
-                    placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                  />
-                </div>
-              </div>
+                placeholder="Enter your password"
+                required
+              />
 
               {error && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
-                  <div className="flex items-center">
-                    <svg className="w-6 h-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-red-700 text-base font-medium">{error}</p>
-                  </div>
-                </div>
+                <Alert variant="error" onClose={() => setError('')}>
+                  <span className="font-medium">{error}</span>
+                </Alert>
               )}
 
-              <button
+              <div className="flex justify-center mt-6">
+                <Button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-4 px-6 rounded-2xl hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105"
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mr-3"></div>
-                    Signing in...
-                  </div>
-                ) : (
-                  'Sign in'
-                )}
-              </button>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={onSwitchToRegister}
-                  className="text-slate-600 hover:text-slate-900 text-base font-medium transition-colors duration-200"
+                  loading={loading}
+                  size="md"
+                  style={{ cursor: 'pointer' }}
+                  className="px-12"
                 >
-                  Don't have an account? <span className="text-blue-600 hover:text-blue-700 font-semibold">Sign up</span>
-                </button>
+                  Sign in
+                </Button>
               </div>
             </form>
+
+            {/* Footer Section */}
+            <div className="mt-6 text-center">
+              <p className="text-gray-600">
+                Don't have an account?{' '}
+                <span 
+                  onClick={onSwitchToRegister}
+                  style={{ cursor: 'pointer' }}
+                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 hover:underline"
+                >
+                  Sign up
+                </span>
+              </p>
           </div>
+          </Card>
         </div>
       </div>
     </div>

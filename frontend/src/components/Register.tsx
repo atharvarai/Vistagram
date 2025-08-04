@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from './Navbar';
+import FormInput from './ui/FormInput';
+import Button from './ui/Button';
+import Card from './ui/Card';
+import Alert from './ui/Alert';
 
 interface RegisterProps {
   onSwitchToLogin: () => void;
@@ -13,12 +17,57 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{[key: string]: string}>({});
+  
   const { register } = useAuth();
+
+  // Real-time validation
+  const validateField = (field: string, value: string) => {
+    const errors = { ...fieldErrors };
+    
+    switch (field) {
+      case 'username':
+        if (value.length < 3) {
+          errors.username = 'Username must be at least 3 characters';
+        } else if (!/^[a-zA-Z0-9_]+$/.test(value)) {
+          errors.username = 'Username can only contain letters, numbers, and underscores';
+        } else {
+          delete errors.username;
+        }
+        break;
+      case 'email':
+        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+          errors.email = 'Please enter a valid email address';
+        } else {
+          delete errors.email;
+        }
+        break;
+      case 'password':
+        if (value.length < 6) {
+          errors.password = 'Password must be at least 6 characters';
+        } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(value)) {
+          errors.password = 'Password must contain at least one letter and one number';
+        } else {
+          delete errors.password;
+        }
+        break;
+      case 'confirmPassword':
+        if (value !== password) {
+          errors.confirmPassword = 'Passwords do not match';
+        } else {
+          delete errors.confirmPassword;
+        }
+        break;
+    }
+    
+    setFieldErrors(errors);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
+    // Final validation
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
@@ -26,6 +75,11 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
 
     if (password.length < 6) {
       setError('Password must be at least 6 characters long');
+      return;
+    }
+
+    if (Object.keys(fieldErrors).length > 0) {
+      setError('Please fix the errors above');
       return;
     }
 
@@ -40,133 +94,175 @@ const Register: React.FC<RegisterProps> = ({ onSwitchToLogin }) => {
     }
   };
 
+  const getPasswordStrength = (password: string) => {
+    let strength = 0;
+    if (password.length >= 6) strength++;
+    if (/(?=.*[a-z])/.test(password)) strength++;
+    if (/(?=.*[A-Z])/.test(password)) strength++;
+    if (/(?=.*\d)/.test(password)) strength++;
+    
+    return strength;
+  };
+
+  const passwordStrength = getPasswordStrength(password);
+  const strengthLabels = ['Very Weak', 'Weak', 'Fair', 'Good'];
+  const strengthColors = ['bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500'];
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
       <Navbar showUserInfo={false} />
-      <div className="flex items-center justify-center min-h-[calc(100vh-80px)] py-12 px-6">
+      
+      <div className="flex items-center justify-center min-h-[calc(100vh-64px)] py-8 px-4">
         <div className="w-full max-w-md">
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl border border-slate-200/50 p-10">
-            <div className="text-center mb-10">
-              <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl">
+          <Card glass={true} shadow="xl" padding="lg" className="transform hover:scale-[1.02] transition-transform duration-300">
+            
+            {/* Header Section */}
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <img 
                   src="/logo.png" 
                   alt="Vistagram" 
-                  style={{ width: '40%', height: '40%' }}
                   className="object-contain"
+                  style={{ width: '100%', height: '100%' }}
                 />
               </div>
-              <h2 className="text-3xl font-bold text-slate-900 mb-3">
+              <h1 className="text-xl font-bold text-gray-900 mb-1">
                 Create account
-              </h2>
-              <p className="text-slate-600 text-lg">
+              </h1>
+              <p className="text-gray-600 text-sm">
                 Join Vistagram and start sharing your experiences
               </p>
             </div>
             
-            <form className="space-y-8" onSubmit={handleSubmit}>
-              <div className="space-y-6">
-                <div>
-                  <label htmlFor="username" className="block text-base font-semibold text-slate-700 mb-3">
-                    Username
-                  </label>
-                  <input
+            {/* Form Section */}
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <FormInput
                     id="username"
-                    name="username"
+                label="Username"
                     type="text"
+                value={username}
+                onChange={(e) => {
+                  setUsername(e.target.value);
+                  validateField('username', e.target.value);
+                }}
+                placeholder="Choose a username"
                     required
-                    className="w-full px-6 py-4 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-slate-900 placeholder-slate-400 text-lg"
-                    placeholder="Choose a username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                  />
-                </div>
+                error={fieldErrors.username}
+                helperText="3+ characters, letters, numbers, and underscores only"
+              />
 
-                <div>
-                  <label htmlFor="email" className="block text-base font-semibold text-slate-700 mb-3">
-                    Email
-                  </label>
-                  <input
+              <FormInput
                     id="email"
-                    name="email"
+                label="Email"
                     type="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  validateField('email', e.target.value);
+                }}
+                placeholder="Enter your email address"
                     required
-                    className="w-full px-6 py-4 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-slate-900 placeholder-slate-400 text-lg"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
+                error={fieldErrors.email}
+              />
                 
                 <div>
-                  <label htmlFor="password" className="block text-base font-semibold text-slate-700 mb-3">
-                    Password
-                  </label>
-                  <input
+                <FormInput
                     id="password"
-                    name="password"
+                  label="Password"
                     type="password"
+                  value={password}
+                  onChange={(e) => {
+                    setPassword(e.target.value);
+                    validateField('password', e.target.value);
+                    if (confirmPassword) {
+                      validateField('confirmPassword', confirmPassword);
+                    }
+                  }}
+                  placeholder="Create a password"
                     required
-                    className="w-full px-6 py-4 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-slate-900 placeholder-slate-400 text-lg"
-                    placeholder="Create a password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                  error={fieldErrors.password}
+                />
+                
+                {/* Password Strength Indicator */}
+                {password && (
+                  <div className="mt-2">
+                    <div className="flex items-center space-x-2">
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div 
+                          className={`h-2 rounded-full transition-all duration-300 ${strengthColors[passwordStrength - 1] || 'bg-gray-200'}`}
+                          style={{ width: `${(passwordStrength / 4) * 100}%` }}
                   />
                 </div>
-
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-base font-semibold text-slate-700 mb-3">
-                    Confirm Password
-                  </label>
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    required
-                    className="w-full px-6 py-4 border-2 border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-slate-900 placeholder-slate-400 text-lg"
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                  />
-                </div>
+                      <span className="text-sm text-gray-600 font-medium">
+                        {strengthLabels[passwordStrength - 1] || 'Very Weak'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
+
+              <FormInput
+                id="confirmPassword"
+                label="Confirm Password"
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => {
+                  setConfirmPassword(e.target.value);
+                  validateField('confirmPassword', e.target.value);
+                }}
+                placeholder="Confirm your password"
+                required
+                error={fieldErrors.confirmPassword}
+              />
 
               {error && (
-                <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
-                  <div className="flex items-center">
-                    <svg className="w-6 h-6 text-red-500 mr-3" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-red-700 text-base font-medium">{error}</p>
-                  </div>
-                </div>
+                <Alert variant="error" onClose={() => setError('')}>
+                  <span className="font-medium">{error}</span>
+                </Alert>
               )}
 
-              <button
+              <div className="flex justify-center mt-6">
+                <Button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white font-bold py-4 px-6 rounded-2xl hover:from-blue-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 text-lg shadow-xl hover:shadow-2xl transform hover:scale-105"
-              >
-                {loading ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mr-3"></div>
-                    Creating account...
-                  </div>
-                ) : (
-                  'Create account'
-                )}
-              </button>
-
-              <div className="text-center">
-                <button
-                  type="button"
-                  onClick={onSwitchToLogin}
-                  className="text-slate-600 hover:text-slate-900 text-base font-medium transition-colors duration-200"
+                  loading={loading}
+                  size="md"
+                  style={{ cursor: 'pointer' }}
+                  className="px-12"
+                  disabled={Object.keys(fieldErrors).length > 0}
                 >
-                  Already have an account? <span className="text-blue-600 hover:text-blue-700 font-semibold">Sign in</span>
-                </button>
+                  Create account
+                </Button>
               </div>
             </form>
+
+            {/* Footer Section */}
+            <div className="mt-6 text-center">
+              <p className="text-gray-600">
+                Already have an account?{' '}
+                <span 
+                  onClick={onSwitchToLogin}
+                  style={{ cursor: 'pointer' }}
+                  className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 hover:underline"
+                >
+                  Sign in
+                </span>
+              </p>
+            </div>
+
+            {/* Terms Section */}
+            <div className="mt-4 pt-4 border-t border-gray-200/50">
+              <p className="text-xs text-gray-500 text-center leading-relaxed">
+                By creating an account, you agree to our{' '}
+                <span style={{ cursor: 'pointer' }} className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200">
+                  Terms of Service
+                </span>{' '}
+                and{' '}
+                <span style={{ cursor: 'pointer' }} className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200">
+                  Privacy Policy
+                </span>
+              </p>
           </div>
+          </Card>
         </div>
       </div>
     </div>
