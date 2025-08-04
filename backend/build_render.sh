@@ -20,7 +20,7 @@ pip install --no-cache-dir --prefer-binary -r requirements_simple.txt
 
 # Verify key packages are installed
 echo "🔍 Verifying installations..."
-python -c "import fastapi, uvicorn, sqlalchemy, redis, pydantic; print('✅ All key packages installed')"
+python -c "import fastapi, uvicorn, sqlalchemy, redis, pydantic, pydantic_settings; print('✅ All key packages installed')"
 
 # Create uploads directory
 echo "📁 Creating uploads directory..."
