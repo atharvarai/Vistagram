@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     ALLOWED_EXTENSIONS: set = {".jpg", ".jpeg", ".png", ".gif"}
     
     # CORS settings
-    ALLOWED_ORIGINS: list = ["http://localhost:3000", "http://localhost:8000"]
+    ALLOWED_ORIGINS: list = ["*"]  # Allow all origins for production deployment
     
     # Frontend URL for share links
     FRONTEND_URL: str = "http://localhost:3000"
