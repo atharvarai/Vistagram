@@ -25,6 +25,7 @@ A modern, Instagram-inspired social media platform for sharing travel experience
 - **FastAPI** - Modern, fast web framework for building APIs with Python
 - **SQLAlchemy** - SQL toolkit and ORM
 - **SQLite** - Lightweight database for development
+- **Redis** - In-memory data store for caching and session management
 - **Pydantic** - Data validation using Python type annotations
 - **JWT** - JSON Web Tokens for authentication
 - **Pillow** - Python Imaging Library for image processing
@@ -40,6 +41,7 @@ A modern, Instagram-inspired social media platform for sharing travel experience
 ### Prerequisites
 - **Node.js** (v16 or higher)
 - **Python** (v3.8 or higher)
+- **Redis** (v6.0 or higher)
 - **npm** or **yarn**
 
 ### Backend Setup
@@ -66,12 +68,17 @@ A modern, Instagram-inspired social media platform for sharing travel experience
    # Edit .env with your configuration
    ```
 
-5. **Initialize database:**
+5. **Start Redis server:**
+   ```bash
+   redis-server
+   ```
+
+6. **Initialize database:**
    ```bash
    python seed_data.py
    ```
 
-6. **Start the backend server:**
+7. **Start the backend server:**
    ```bash
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
@@ -132,6 +139,9 @@ SECRET_KEY=your-secret-key-here
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 UPLOAD_DIR=uploads
+REDIS_URL=redis://localhost:6379
+REDIS_DB=0
+REDIS_PASSWORD=
 ```
 
 ### Frontend Configuration

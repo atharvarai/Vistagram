@@ -13,4 +13,10 @@ services:
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: 30
       - key: UPLOAD_DIR
-        value: uploads 
+        value: uploads
+      - key: REDIS_URL
+        value: redis://localhost:6379
+      - key: REDIS_DB
+        value: 0
+      - key: REDIS_PASSWORD
+        value: "" 

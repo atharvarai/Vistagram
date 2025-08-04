@@ -83,7 +83,7 @@ const Timeline: React.FC = () => {
       <div className="mb-4">
         <button
           onClick={() => setShowCreatePost(true)}
-          className="w-full bg-white rounded-xl p-4 flex justify-between items-center space-x-3 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 shadow-sm transform hover:scale-[1.02]"
+          className="w-full bg-white rounded-xl p-4 flex justify-center items-center space-x-3 hover:bg-gray-50 hover:shadow-lg transition-all duration-200 shadow-sm transform hover:scale-[1.02]"
           style={{ border: 'none', outline: 'none' }}
         >
           <div className="w-10 h-10 flex items-center justify-center">
