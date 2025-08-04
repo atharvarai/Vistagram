@@ -5,6 +5,7 @@ from app.core.database import get_db
 from app.schemas.user import UserCreate, User, Token
 from app.services.user_service import UserService
 from app.core.auth import get_current_active_user
+from app.core.redis import redis_service
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -30,6 +31,11 @@ def login(
         )
     
     access_token = UserService.create_access_token_for_user(user)
+    
+    # Store session in Redis
+    redis_service.set_session(user.id, access_token, expires=3600)  # 1 hour
+    redis_service.set_user_online(user.id, expires=300)  # 5 minutes
+    
     return {"access_token": access_token, "token_type": "bearer"}
 
 

@@ -166,7 +166,7 @@ const PublicPost: React.FC = () => {
         {/* Call to Action */}
         <div className="mt-8 text-center">
           <div className="bg-white border border-gray-200 rounded-lg p-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
               <img 
                 src="/logo.png" 
                 alt="Vistagram" 
@@ -178,7 +178,7 @@ const PublicPost: React.FC = () => {
             <p className="text-gray-700 text-sm mb-4">Discover amazing places and share your own experiences!</p>
             <a
               href="/"
-              className="inline-flex items-center px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium transition-colors duration-200"
+              className="inline-flex items-center px-6 py-3 border text-white rounded-lg hover:bg-blue-100 font-medium transition-colors duration-200"
             >
               <span className="text-blue-500">Explore More Posts</span>
               <svg className="w-5 h-5 ml-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

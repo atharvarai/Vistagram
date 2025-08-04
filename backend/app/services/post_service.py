@@ -4,6 +4,7 @@ from app.models.post import Post, Like, Share
 from app.models.user import User
 from app.schemas.post import PostUpdate
 from app.utils.file_upload import save_image_file, delete_image_file, get_image_url
+from app.core.redis import redis_service
 from fastapi import HTTPException
 from typing import List, Optional
 
@@ -60,20 +61,25 @@ class PostService:
          .limit(limit)\
          .all()
         
-        user_likes = db.query(Like.post_id).filter(Like.user_id == current_user_id).all()
-        liked_post_ids = {like.post_id for like in user_likes}
+        # Get user's liked posts from Redis
+        user_liked_posts = redis_service.get_user_liked_posts(current_user_id)
         
         timeline = []
         for post, username in posts:
+            # Get like and share counts from Redis if available, otherwise use database
+            redis_counts = redis_service.get_post_counts(post.id)
+            likes_count = redis_counts.get("likes", post.likes_count)
+            shares_count = redis_counts.get("shares", post.shares_count)
+            
             timeline.append({
                 "id": post.id,
                 "username": username,
                 "image_url": get_image_url(post.image_path),
                 "caption": post.caption,
-                "likes_count": post.likes_count,
-                "shares_count": post.shares_count,
+                "likes_count": likes_count,
+                "shares_count": shares_count,
                 "created_at": post.created_at,
-                "is_liked": post.id in liked_post_ids
+                "is_liked": post.id in user_liked_posts
             })
         
         return timeline
@@ -88,27 +94,46 @@ class PostService:
         """Like a post."""
         post = _get_post_or_404(db, post_id)
         
-        existing_like = db.query(Like).filter(
-            Like.user_id == user_id,
-            Like.post_id == post_id
-        ).first()
+        # Check if user has already liked the post using Redis
+        has_liked = redis_service.has_user_liked(user_id, post_id)
         
-        if existing_like:
-            db.delete(existing_like)
-            post.likes_count = max(0, post.likes_count - 1)
-            db.commit()
+        if has_liked:
+            # Unlike the post
+            redis_service.remove_user_like(user_id, post_id)
+            redis_service.decrement_like_count(post_id)
+            # Also remove from database
+            existing_like = db.query(Like).filter(
+                Like.user_id == user_id,
+                Like.post_id == post_id
+            ).first()
+            if existing_like:
+                db.delete(existing_like)
+                post.likes_count = max(0, post.likes_count - 1)
+                db.commit()
             return False
         else:
-            new_like = Like(user_id=user_id, post_id=post_id)
-            db.add(new_like)
-            post.likes_count += 1
-            db.commit()
+            # Like the post
+            redis_service.add_user_like(user_id, post_id)
+            redis_service.increment_like_count(post_id)
+            # Also add to database
+            existing_like = db.query(Like).filter(
+                Like.user_id == user_id,
+                Like.post_id == post_id
+            ).first()
+            if not existing_like:
+                new_like = Like(user_id=user_id, post_id=post_id)
+                db.add(new_like)
+                post.likes_count += 1
+                db.commit()
             return True
     
     @staticmethod
     def share_post(db: Session, user_id: int, post_id: int) -> bool:
         """Share a post."""
         post = _get_post_or_404(db, post_id)
+        
+        # Increment share count in Redis
+        redis_service.increment_share_count(post_id)
         
         new_share = Share(user_id=user_id, post_id=post_id)
         db.add(new_share)
